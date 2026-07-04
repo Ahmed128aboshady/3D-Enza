@@ -242,12 +242,18 @@ function App() {
     setCart(prev => {
       const ex = prev.find(i => i.key === key);
       if (ex) return prev.map(i => i.key === key ? { ...i, qty: i.qty + qty } : i);
-      return [...prev, { key, id: p.id, name: p.name, color: v.color, img: v.img, price: p.price, size: p.specs.size, qty }];
+      return [...prev, { key, id: p.id, name: p.name, cat: p.cat, color: v.color, img: v.img, price: p.price, size: p.specs.size, qty }];
     });
   }, []);
   const updateQty = useCallback((key, d) => setCart(prev => prev.map(i => i.key === key ? { ...i, qty: Math.max(1, i.qty + d) } : i)), []);
   const removeItem = useCallback((key) => setCart(prev => prev.filter(i => i.key !== key)), []);
-  const subtotal = aUM(() => cart.reduce((s, i) => s + i.price * i.qty, 0), [cart]);
+  
+  const spoolCount = aUM(() => cart.reduce((s, i) => (i.cat !== 'resin' ? s + i.qty : s), 0), [cart]);
+  const bulkDiscount = aUM(() => (spoolCount >= 10 ? spoolCount * 50 : 0), [spoolCount]);
+  const subtotal = aUM(() => {
+    const raw = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    return Math.max(0, raw - bulkDiscount);
+  }, [cart, bulkDiscount]);
 
   const openCart = () => setCartOpen(true);
   const closeCart = () => setCartOpen(false);
@@ -376,7 +382,7 @@ function App() {
 
   const store = {
     lang, setLang, dir, route, navigate, t, money,
-    cart, addToCart, updateQty, removeItem, subtotal, openCart, closeCart,
+    cart, addToCart, updateQty, removeItem, subtotal, spoolCount, bulkDiscount, openCart, closeCart,
     lastOrder, placeOrder, toast,
     showBadges: tw.badges,
     products, orders, categories, shipRates, content,

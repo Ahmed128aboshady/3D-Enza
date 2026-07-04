@@ -131,7 +131,7 @@ const ProductCard = ({ p }) => {
         {onSale && <span className="card-tag sale">-{Math.round((1 - p.price / p.compareAt) * 100)}%</span>}
         {!onSale && p.featured && showBadges !== false && <span className="card-tag">{t({ en: 'Bestseller', ar: 'الأكثر طلباً' })}</span>}
         <button className="card-fav" onClick={(e) => e.stopPropagation()} aria-label="Save"><Icon n="heart" /></button>
-        <img src={v.img} alt={t(p.name)} />
+        <img src={v.img} alt={t(p.name)} loading="lazy" />
         {!anyStock && <div className="card-oos"><span>{t({ en: 'Out of stock', ar: 'نفد المخزون' })}</span></div>}
         {anyStock && (
           <div className="card-quick" onClick={(e) => e.stopPropagation()}>
@@ -199,7 +199,7 @@ const Footer = () => {
       <div className="ftr-pattern" />
       <div className="ftr-inner">
         <div className="ftr-logo">
-          <img src="logo.png?v=2" alt="Enza Trade" />
+          <img src="logo.png?v=2" alt="Enza Trade" loading="lazy" />
           <p className="ftr-tag">{t(fc.tagline || { en: '', ar: '' })}</p>
         </div>
         <div>
@@ -271,7 +271,7 @@ const FloatingSocial = () => {
 
 /* ---------- Cart drawer ---------- */
 const CartDrawer = () => {
-  const { cart, closeCart, t, money, updateQty, removeItem, navigate, subtotal } = useStore();
+  const { cart, closeCart, t, money, updateQty, removeItem, navigate, subtotal, bulkDiscount } = useStore();
   return (
     <>
       <div className="scrim" onClick={closeCart} />
@@ -283,7 +283,7 @@ const CartDrawer = () => {
         {cart.length === 0 ? (
           <div className="drawer-body">
             <div className="cart-empty">
-              <img src="logo.png?v=2" alt="" />
+              <img src="logo.png?v=2" alt="" loading="lazy" />
               <p>{t({ en: 'Your bag is empty.', ar: 'سلتك فاضية.' })}</p>
               <button className="btn btn-outline" onClick={() => { closeCart(); navigate('shop'); }}>{t({ en: 'Start shopping', ar: 'ابدأ التسوق' })}</button>
             </div>
@@ -293,7 +293,7 @@ const CartDrawer = () => {
             <div className="drawer-body">
               {cart.map((it) => (
                 <div className="line-item" key={it.key}>
-                  <div className="li-img"><img src={it.img} alt="" /></div>
+                  <div className="li-img"><img src={it.img} alt="" loading="lazy" /></div>
                   <div className="li-body">
                     <span className="li-name">{t(it.name)}</span>
                     <span className="li-meta">{t(it.color)}{it.size ? ' · ' + t(it.size) : ''}</span>
@@ -312,7 +312,19 @@ const CartDrawer = () => {
             </div>
             <div className="drawer-foot">
               <div className="cod-note"><Icon n="cash" />{t({ en: 'Cash on delivery — no upfront payment', ar: 'الدفع عند الاستلام — من غير أي مقدم' })}</div>
-              <div className="summary-row total"><span>{t({ en: 'Subtotal', ar: 'الإجمالي' })}</span><span>{money(subtotal)}</span></div>
+              {bulkDiscount > 0 && (
+                <>
+                  <div className="summary-row" style={{ fontSize: '0.95em', color: 'var(--ink-soft)' }}>
+                    <span>{t({ en: 'Before Discount', ar: 'الإجمالي قبل الخصم' })}</span>
+                    <span style={{ textDecoration: 'line-through' }}>{money(subtotal + bulkDiscount)}</span>
+                  </div>
+                  <div className="summary-row" style={{ fontSize: '0.95em', color: 'var(--accent)', fontWeight: '600' }}>
+                    <span>{t({ en: 'Bulk Discount (10+ spools)', ar: 'خصم عرض الـ 10 بكرات' })}</span>
+                    <span>-{money(bulkDiscount)}</span>
+                  </div>
+                </>
+              )}
+              <div className="summary-row total"><span>{t({ en: 'Subtotal', ar: 'الإجمالي النهائي' })}</span><span>{money(subtotal)}</span></div>
               <button className="btn btn-primary btn-lg btn-block" onClick={() => { closeCart(); navigate('checkout'); }}>
                 {t({ en: 'Checkout', ar: 'إتمام الطلب' })} <Icon n="arrow" style={{ width: 18 }} />
               </button>

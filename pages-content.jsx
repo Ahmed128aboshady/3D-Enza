@@ -31,17 +31,149 @@ const ValIcon = ({ item }) => (
     : <Icon n={item ? item.icon : 'sparkle'} />
 );
 
+/* ---------- Custom Request Form Component ---------- */
+const CustomRequestForm = () => {
+  const { t, toast } = useStore();
+  const [f, setF] = React.useState({ name: '', phone: '', material: '', qty: '', notes: '' });
+  const [submitting, setSubmitting] = React.useState(false);
+  const set = (k) => (e) => setF(s => ({ ...s, [k]: e.target.value }));
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!f.name || !f.phone || !f.material) {
+      toast(t({ en: 'Please fill required fields', ar: 'من فضلك املأ الحقول المطلوبة' }));
+      return;
+    }
+    setSubmitting(true);
+    const waMsg = t({
+      en: `Hi Enza Trade! I'd like to request a custom material:\n• Material: ${f.material}\n• Qty: ${f.qty || 1}\n• Name: ${f.name}\n• Phone: ${f.phone}\n• Notes: ${f.notes}`,
+      ar: `أهلاً إنزا تريد! حابب أطلب خامة غير متوفرة:\n• الخامة المطلوبة: ${f.material}\n• الكمية: ${f.qty || 1}\n• الاسم: ${f.name}\n• الهاتف: ${f.phone}\n• ملاحظات: ${f.notes}`
+    });
+    window.open(`https://wa.me/201208640240?text=${encodeURIComponent(waMsg)}`, '_blank');
+    setF({ name: '', phone: '', material: '', qty: '', notes: '' });
+    setSubmitting(false);
+    toast(t({ en: 'Request sent to WhatsApp!', ar: 'تم إرسال طلبك لواتساب!' }));
+  };
+
+  return (
+    <div className="custom-request-box">
+      <div className="stack gap-s">
+        <span className="eyebrow">{t({ en: 'Special Requests', ar: 'طلبات خاصة' })}</span>
+        <h2>{t({ en: 'Request a Custom Material', ar: 'طلب خامة غير متوفرة أو طلب خاص' })}</h2>
+        <p className="muted">{t({
+          en: 'Looking for a specific material or color we don\'t have? Fill this form and we will import it for you.',
+          ar: 'بتدور على خامة أو لون مش موجودين في الموقع؟ اكتب تفاصيل طلبك هنا وهنوفرها لك في أسرع وقت.'
+        })}</p>
+      </div>
+      <form onSubmit={handleSubmit} className="custom-request-form">
+        <div className="field">
+          <label>{t({ en: 'Full Name', ar: 'الاسم بالكامل' })} <span className="req">*</span></label>
+          <input className="input" value={f.name} onChange={set('name')} placeholder={t({ en: 'Your Name', ar: 'اسمك بالكامل' })} required />
+        </div>
+        <div className="field">
+          <label>{t({ en: 'Phone Number', ar: 'رقم الهاتف' })} <span className="req">*</span></label>
+          <input className="input" value={f.phone} onChange={set('phone')} placeholder={t({ en: 'Your Phone', ar: 'رقم الموبايل' })} required />
+        </div>
+        <div className="field">
+          <label>{t({ en: 'Material Name / Color', ar: 'الخامة المطلوبة / اللون' })} <span className="req">*</span></label>
+          <input className="input" value={f.material} onChange={set('material')} placeholder={t({ en: 'e.g. PLA Red, TPU...', ar: 'مثال: فيلامينت بولي كربونات، لون خاص…' })} required />
+        </div>
+        <div className="field">
+          <label>{t({ en: 'Quantity (Spools/KG)', ar: 'الكمية المطلوبة' })}</label>
+          <input className="input" type="number" value={f.qty} onChange={set('qty')} placeholder="1" />
+        </div>
+        <div className="field full" style={{ marginBottom: 12 }}>
+          <label>{t({ en: 'Additional Notes', ar: 'ملاحظات إضافية' })}</label>
+          <textarea className="input" value={f.notes} onChange={set('notes')} rows="2" placeholder={t({ en: 'Specific brand, size, specifications…', ar: 'براند معين، قطر السلك، مواصفات خاصة…' })} />
+        </div>
+        <button className="btn btn-primary btn-lg" type="submit" style={{ marginTop: 10 }}>
+          <Icon n="chat" style={{ width: 18 }} />
+          {t({ en: 'Submit Request on WhatsApp', ar: 'إرسال الطلب لواتساب' })}
+        </button>
+      </form>
+    </div>
+  );
+};
+
 /* ---------- Home ---------- */
 const HomePage = () => {
   const { t, dir, navigate, lang, products, content } = useStore();
-  const featured = (products.filter(p => p.featured).length ? products.filter(p => p.featured) : products).slice(0, 4);
+  const bestsellers = products.slice(0, 8); // show first 8 products as bestsellers
   const go = useCta();
   const hc = content.hero || {};
-  const heroImg = hc.image || 'assets/products/tote-beige.png';
+  const heroImg = hc.image || 'logo.png';
   const vals = content.values || [];
   const eh = content.editHead || {};
   const gift = content.gift || {};
   const quote = content.quote || {};
+
+  const BrandRibbon = (
+    <div className="brands-ribbon">
+      <span className="importer-badge">
+        <Icon n="shield" style={{ width: 16 }} />
+        {t({ en: 'Direct & Certified Importer', ar: 'مستورد مباشر ومعتمد بمصر' })}
+      </span>
+      <div className="brand-item">
+        <Icon n="box" style={{ width: 20, color: 'var(--accent)' }} />
+        <span>Bambu Lab (بامبو لاب)</span>
+      </div>
+      <div className="brand-item">
+        <Icon n="leaf" style={{ width: 20, color: 'var(--accent)' }} />
+        <span>eSUN Filaments (إي صن)</span>
+      </div>
+      <div className="brand-item">
+        <Icon n="gauge" style={{ width: 20, color: 'var(--accent)' }} />
+        <span>3D Resins (ريزن 3D)</span>
+      </div>
+    </div>
+  );
+
+  const HomeCategories = (
+    <div className="home-categories-grid">
+      <button className="home-cat-card" onClick={() => navigate('shop', { cat: 'pla-plus' })}>
+        <div className="icon-box"><Icon n="box" /></div>
+        <span>{t({ en: 'PLA+ Filaments', ar: 'خيوط PLA+' })}</span>
+      </button>
+      <button className="home-cat-card" onClick={() => navigate('shop', { cat: 'bambu' })}>
+        <div className="icon-box"><Icon n="sparkle" /></div>
+        <span>{t({ en: 'Bambu Lab Filaments', ar: 'خامات بامبو لاب' })}</span>
+      </button>
+      <button className="home-cat-card" onClick={() => navigate('shop', { cat: 'resin' })}>
+        <div className="icon-box"><Icon n="gauge" /></div>
+        <span>{t({ en: '3D Resins', ar: 'ريزن 3D ثلاثي الأبعاد' })}</span>
+      </button>
+      <button className="home-cat-card" onClick={() => navigate('shop', { cat: 'pla-cf' })}>
+        <div className="icon-box"><Icon n="leaf" /></div>
+        <span>{t({ en: 'Carbon Fiber / CF', ar: 'ألياف الكربون CF' })}</span>
+      </button>
+      <button className="home-cat-card" onClick={() => navigate('shop', { cat: 'asa' })}>
+        <div className="icon-box"><Icon n="shield" /></div>
+        <span>{t({ en: 'ASA Weatherproof', ar: 'خيوط ASA المقاومة' })}</span>
+      </button>
+    </div>
+  );
+
+  const BundleOffer = (
+    <div className="bundle-banner">
+      <div className="bundle-banner-pattern" />
+      <div className="bundle-content">
+        <div className="bundle-text">
+          <span className="eyebrow" style={{ color: 'var(--accent)' }}>{t({ en: 'Special Wholesale Deal', ar: 'عرض خاص للطلبات الكبيرة' })}</span>
+          <h2>{t({ en: 'Buy 10+ Spools, Save 50 LE/Spool!', ar: 'اشترِ 10 بكرات أو أكثر ووفر 50 ج.م على كل بكرة!' })}</h2>
+          <p>{t({
+            en: 'Add any 10 or more filament spools (PLA+, ABS+, ASA, Carbon Fiber) to your cart, and the discount will be applied automatically at checkout. Pay cash on delivery.',
+            ar: 'أضف أي 10 بكرات فيلامينت أو أكثر إلى سلتك (PLA+، ABS+، ASA، أو كربون فايبر)، وسيتم تطبيق الخصم تلقائياً عند الدفع. الدفع كاش عند الاستلام.'
+          })}</p>
+          <button className="btn btn-primary" onClick={() => navigate('shop')}>{t({ en: 'Shop Filaments Now', ar: 'تسوق الفيلامينت الآن' })}</button>
+        </div>
+        <div className="bundle-price-tag">
+          <span>{t({ en: 'Bulk Filament Price', ar: 'سعر البكرة في العرض يبدأ من' })}</span>
+          <strong className="big">650 ج.م</strong>
+          <span>{t({ en: 'Instead of 700 LE', ar: 'بدلاً من 700 ج.م' })}</span>
+        </div>
+      </div>
+    </div>
+  );
 
   const Hero = dir === 'b' ? (
     <section className="hero hero-b">
@@ -84,7 +216,52 @@ const HomePage = () => {
     <>
       {Hero}
       <Marquee />
+
+      {/* Brands ribbon & Quick categories */}
+      <section className="wrap section-sm" style={{ paddingBottom: 0 }}>
+        {BrandRibbon}
+        {HomeCategories}
+      </section>
+
+      {/* Bestsellers section */}
+      <section className="wrap section" style={{ paddingTop: 30 }}>
+        <div className="sec-head">
+          <div className="stack">
+            <span className="eyebrow">{t(eh.eyebrow)}</span>
+            <h2 className="h2">{t(eh.title)}</h2>
+          </div>
+          <button className="btn btn-ghost" onClick={() => navigate('shop')}>{t(eh.viewAll)}</button>
+        </div>
+        <div className="grid-products home-grid">{bestsellers.map(p => <ProductCard key={p.id} p={p} />)}</div>
+      </section>
+
+      {/* Spool Bundle Deal section */}
+      <section className="wrap section-sm" style={{ paddingTop: 0 }}>
+        {BundleOffer}
+      </section>
+
+      {/* Resin section */}
+      <section className="section" style={{ background: dir === 'b' ? 'var(--paper)' : 'transparent', paddingTop: 60, paddingBottom: 60 }}>
+        <div className="wrap split">
+          <div className="split-img" style={{ aspectRatio: '1/1', background: 'radial-gradient(120% 90% at 50% 20%,#fff,var(--sand))', display: 'grid', placeItems: 'center', overflow: 'hidden', padding: '6%', borderRadius: 'var(--radius-lg)' }}>
+            <img src="resin_collage.png" alt="Enza Trade 3D Resin Collage" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
+          </div>
+          <div className="stack gap-l">
+            <span className="eyebrow">{t(gift.eyebrow)}</span>
+            <h2 className="h1" style={{ fontSize: 'clamp(30px,4.4vw,58px)' }}>{t(gift.title)}</h2>
+            <p className="lede">{t(gift.lede)}</p>
+            <div className="hero-actions"><Cta go={go} href={gift.buttonHref} fallback="shop" className="btn btn-primary btn-lg">{t(gift.button)}</Cta></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Custom Request Form section */}
       <section className="wrap section">
+        <CustomRequestForm />
+      </section>
+
+      {/* About Enza section */}
+      <section className="wrap section" style={{ paddingTop: 0 }}>
         <div className="values">
           {vals.map((v, i) => (
             <div className="value" key={i}>
@@ -93,32 +270,6 @@ const HomePage = () => {
               <p className="muted">{t(v.p)}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="wrap section" style={{ paddingTop: 0 }}>
-        <div className="sec-head">
-          <div className="stack">
-            <span className="eyebrow">{t(eh.eyebrow)}</span>
-            <h2 className="h2">{t(eh.title)}</h2>
-          </div>
-          <button className="btn btn-ghost" onClick={() => navigate('shop')}>{t(eh.viewAll)}</button>
-        </div>
-        <div className="grid-products home-grid">{featured.map(p => <ProductCard key={p.id} p={p} />)}</div>
-      </section>
-
-      {/* Gift editorial */}
-      <section className="section" style={{ background: dir === 'b' ? 'var(--paper)' : 'transparent' }}>
-        <div className="wrap split">
-          <div className="split-img" style={{ aspectRatio: '1/1', background: 'radial-gradient(120% 90% at 50% 20%,#fff,var(--sand))', display: 'grid', placeItems: 'center', overflow: 'hidden', padding: '6%' }}>
-            <img src={gift.image} alt="Enza Trade packaging" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
-          </div>
-          <div className="stack gap-l">
-            <span className="eyebrow">{t(gift.eyebrow)}</span>
-            <h2 className="h1" style={{ fontSize: 'clamp(30px,4.4vw,58px)' }}>{t(gift.title)}</h2>
-            <p className="lede">{t(gift.lede)}</p>
-            <div className="hero-actions"><Cta go={go} href={gift.buttonHref} fallback="shop" className="btn btn-primary btn-lg">{t(gift.button)}</Cta></div>
-          </div>
         </div>
       </section>
 

@@ -141,7 +141,7 @@ const ProductPage = () => {
                   onClick={() => setActiveImg(img)}
                   aria-label={t(v.color)}
                 >
-                  <img src={img} alt="" />
+                  <img src={img} alt="" loading="lazy" />
                 </button>
               ))}
             </div>
@@ -291,7 +291,7 @@ const SPEC_LABELS = {
 
 /* ---------- Checkout ---------- */
 const CheckoutPage = () => {
-  const { t, money, cart, subtotal, navigate, lang, placeOrder, shipRates } = useStore();
+  const { t, money, cart, subtotal, bulkDiscount, navigate, lang, placeOrder, shipRates } = useStore();
   const [f, setF] = uS({ name: '', phone: '', gov: '', city: '', address: '', notes: '' });
   const [errs, setErrs] = uS({});
   const set = (k) => (e) => setF(s => ({ ...s, [k]: e.target.value }));
@@ -381,6 +381,18 @@ const CheckoutPage = () => {
             </div>
           ))}
           <div className="stack gap-s" style={{ padding: '16px 0' }}>
+            {bulkDiscount > 0 && (
+              <>
+                <div className="summary-row" style={{ fontSize: '0.9em', color: 'var(--ink-soft)' }}>
+                  <span>{t({ en: 'Before Discount', ar: 'الإجمالي قبل الخصم' })}</span>
+                  <span style={{ textDecoration: 'line-through' }}>{money(subtotal + bulkDiscount)}</span>
+                </div>
+                <div className="summary-row" style={{ fontSize: '0.9em', color: 'var(--accent)', fontWeight: '600' }}>
+                  <span>{t({ en: 'Bulk Discount (10+ spools)', ar: 'خصم عرض الـ 10 بكرات' })}</span>
+                  <span>-{money(bulkDiscount)}</span>
+                </div>
+              </>
+            )}
             <div className="summary-row"><span>{t({ en: 'Subtotal', ar: 'الإجمالي الفرعي' })}</span><span>{money(subtotal)}</span></div>
             <div className="summary-row">
               <span>{t({ en: 'Shipping', ar: 'الشحن' })}</span>
