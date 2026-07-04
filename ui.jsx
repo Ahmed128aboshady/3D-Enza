@@ -43,11 +43,10 @@ const Icon = ({ n, ...p }) => {
 /* ---------- Logo ---------- */
 const Logo = () => {
   const { navigate, dir } = useStore();
-  const src = dir === 'b' ? 'logo_light.png?v=2' : 'logo.png?v=2';
+  const src = dir === 'b' ? 'logo_light.png?v=5' : 'logo.png?v=5';
   return (
     <button className="brand" onClick={() => navigate('home')} aria-label="Enza Trade home">
-      <img src={src} alt="" style={{ height: 40 }} />
-      <span className="brand-word">Enza Trade</span>
+      <img src={src} alt="" style={{ height: 54 }} />
     </button>
   );
 };
@@ -200,7 +199,7 @@ const Footer = () => {
       <div className="ftr-pattern" />
       <div className="ftr-inner">
         <div className="ftr-logo">
-          <img src="logo_light.png?v=2" alt="Enza Trade" loading="lazy" />
+          <img src="logo_light.png?v=5" alt="Enza Trade" loading="lazy" />
           <p className="ftr-tag">{t(fc.tagline || { en: '', ar: '' })}</p>
         </div>
         <div>
