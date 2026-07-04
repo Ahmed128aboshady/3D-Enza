@@ -808,7 +808,7 @@ const SITE_CONTENT = {
       "en": "Imported original filaments and resins from world-leading brands eSUN & Bambu Lab. Engineered for smooth finishes, high strength, and reliability.",
       "ar": "خيوط وريزن أصلية 100% مستوردة من كبرى الماركات eSUN و Bambu Lab بمصر. مصممة لأعلى دقة أبعاد، ألوان رائعة، ومتانة استثنائية."
     },
-    "image": "logo.png",
+    "image": "logo.png?v=3",
     "primaryLabel": {
       "en": "Shop the catalog",
       "ar": "تصفح المنتجات"
@@ -931,7 +931,7 @@ const SITE_CONTENT = {
       "en": "Egypt's premier destination for original, professional 3D printing filaments and resins.",
       "ar": "المورد الرائد في مصر لأجود خامات الفيلامينت والريزن الأصلية للمحترفين والهواة."
     },
-    "image": "logo_cropped.png",
+    "image": "logo_cropped.png?v=3",
     "splitTitle": {
       "en": "More than just materials",
       "ar": "أكثر من مجرد خامات"
