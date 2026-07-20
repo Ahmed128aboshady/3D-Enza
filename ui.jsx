@@ -59,11 +59,22 @@ const Header = () => {
   const links = [
     ['home', { en: 'Home', ar: 'الرئيسية' }],
     ['shop', { en: 'Shop', ar: 'المتجر' }],
+    ['custom-request', { en: 'Special Requests', ar: 'طلبات خاصة' }],
     ['about', { en: 'About', ar: 'عن إنزا تريد' }],
     ['shipping', { en: 'Shipping', ar: 'الشحن' }],
     ['faq', { en: 'Q&A', ar: 'أسئلة' }],
   ];
-  const go = (r) => { setMnav(false); navigate(r); };
+  const go = (r) => { 
+    setMnav(false); 
+    if (r === 'custom-request') {
+      navigate('home');
+      setTimeout(() => {
+        document.getElementById('custom-request-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    } else {
+      navigate(r);
+    }
+  };
   return (
     <>
       <div className="announce">{t(content.announce || { en: '', ar: '' })}</div>
@@ -73,7 +84,7 @@ const Header = () => {
           <Logo />
           <nav className="nav">
             {links.map(([r, l]) => (
-              <a key={r} className={route.name === r ? 'active' : ''} onClick={() => navigate(r)}>{t(l)}</a>
+              <a key={r} className={route.name === r ? 'active' : ''} onClick={() => go(r)}>{t(l)}</a>
             ))}
           </nav>
           <div className="hdr-actions">
@@ -119,7 +130,7 @@ const Marquee = () => {
 
 /* ---------- Product card ---------- */
 const ProductCard = ({ p }) => {
-  const { navigate, t, money, addToCart, toast, showBadges, categories } = useStore();
+  const { navigate, t, money, addToCart, toast, showBadges, categories, optImg } = useStore();
   const [vi, setVi] = useState(0);
   const v = p.variants[vi] || p.variants[0];
   const anyStock = p.variants.some(x => x.stock);
@@ -131,7 +142,7 @@ const ProductCard = ({ p }) => {
         {onSale && <span className="card-tag sale">-{Math.round((1 - p.price / p.compareAt) * 100)}%</span>}
         {!onSale && p.featured && showBadges !== false && <span className="card-tag">{t({ en: 'Bestseller', ar: 'الأكثر طلباً' })}</span>}
         <button className="card-fav" onClick={(e) => e.stopPropagation()} aria-label="Save"><Icon n="heart" /></button>
-        <img src={v.img} alt={t(p.name)} loading="lazy" />
+        <img src={optImg(v.img, 512)} alt={t(p.name)} loading="lazy" />
         {!anyStock && <div className="card-oos"><span>{t({ en: 'Out of stock', ar: 'نفد المخزون' })}</span></div>}
         {anyStock && (
           <div className="card-quick" onClick={(e) => e.stopPropagation()}>
@@ -178,10 +189,20 @@ const Footer = () => {
   const { t, navigate, isAdmin, setLoginOpen, content, categories } = useStore();
   const fc = content.footer || {};
   const social = fc.social || {};
+  const goFooter = (r) => {
+    if (r === 'custom-request') {
+      navigate('home');
+      setTimeout(() => {
+        document.getElementById('custom-request-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    } else {
+      navigate(r);
+    }
+  };
   const col = (head, links) => (
     <div>
       <h4>{t(head)}</h4>
-      {links.map(([l, r], i) => <a key={i} onClick={() => navigate(r)}>{t(l)}</a>)}
+      {links.map(([l, r], i) => <a key={i} onClick={() => goFooter(r)}>{t(l)}</a>)}
     </div>
   );
   const goCat = (catId) => { navigate('shop', catId && catId !== 'all' ? { cat: catId } : {}); };
@@ -212,6 +233,7 @@ const Footer = () => {
           [{ en: 'About Enza Trade', ar: 'عن إنزا تريد' }, 'about'],
           [{ en: 'Shipping info', ar: 'معلومات الشحن' }, 'shipping'],
           [{ en: 'Q & A', ar: 'الأسئلة الشائعة' }, 'faq'],
+          [{ en: 'Special Requests', ar: 'طلبات خاصة' }, 'custom-request'],
         ])}
       </div>
       <div className="ftr-bottom">
@@ -271,7 +293,7 @@ const FloatingSocial = () => {
 
 /* ---------- Cart drawer ---------- */
 const CartDrawer = () => {
-  const { cart, closeCart, t, money, updateQty, removeItem, navigate, subtotal, bulkDiscount } = useStore();
+  const { cart, closeCart, t, money, updateQty, removeItem, navigate, subtotal, bulkDiscount, optImg, spoolCount } = useStore();
   return (
     <>
       <div className="scrim" onClick={closeCart} />
@@ -293,7 +315,7 @@ const CartDrawer = () => {
             <div className="drawer-body">
               {cart.map((it) => (
                 <div className="line-item" key={it.key}>
-                  <div className="li-img"><img src={it.img} alt="" loading="lazy" /></div>
+                  <div className="li-img"><img src={optImg(it.img, 128)} alt="" loading="lazy" /></div>
                   <div className="li-body">
                     <span className="li-name">{t(it.name)}</span>
                     <span className="li-meta">{t(it.color)}{it.size ? ' · ' + t(it.size) : ''}</span>
@@ -311,6 +333,17 @@ const CartDrawer = () => {
               ))}
             </div>
             <div className="drawer-foot">
+              {spoolCount >= 5 && spoolCount < 10 && (
+                <div className="cart-nudge-box">
+                  <Icon n="sparkle" style={{ color: 'var(--accent)', width: 16, height: 16 }} />
+                  <span>
+                    {t({
+                      en: `Add ${10 - spoolCount} more spool(s) to get 50 LE discount per spool!`,
+                      ar: `أضف ${10 - spoolCount} بكرات إضافية لتوفير 50 ج.م على كل بكرة!`
+                    })}
+                  </span>
+                </div>
+              )}
               <div className="cod-note"><Icon n="cash" />{t({ en: 'Cash on delivery — no upfront payment', ar: 'الدفع عند الاستلام — من غير أي مقدم' })}</div>
               {bulkDiscount > 0 && (
                 <>

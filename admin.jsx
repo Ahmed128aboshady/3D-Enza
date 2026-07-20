@@ -234,7 +234,7 @@ const ProductEditor = ({ initial, onDone }) => {
 /* ---------- Admin dashboard ---------- */
 const AdminPage = () => {
   const { t, lang, money, navigate, products, saveProduct, deleteProduct, resetProducts,
-    orders, updateOrder, deleteOrder, creds, setCreds, logout, categories } = useStore();
+    orders, updateOrder, deleteOrder, creds, setCreds, logout, categories, optImg } = useStore();
   const [tab, setTab] = adUS('products');
   const [editing, setEditing] = adUS(null);
   const L = (en, ar) => t({ en, ar });
@@ -269,7 +269,7 @@ const AdminPage = () => {
                 const inStock = p.variants.some(v => v.stock);
                 return (
                   <div className="adm-row" key={p.id}>
-                    <div className="a-thumb"><img src={p.variants[0].img} alt="" /></div>
+                    <div className="a-thumb"><img src={optImg(p.variants[0].img, 128)} alt="" /></div>
                     <div className="a-info">
                       <div className="a-name">{t(p.name) || L('(untitled)', '(بدون اسم)')}</div>
                       <div className="a-meta">{p.sku || '—'} · {t(categories.find(c => c.id === p.cat) || {})} · {p.variants.length} {L('colors', 'ألوان')}</div>

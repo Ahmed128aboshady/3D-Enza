@@ -380,8 +380,16 @@ function App() {
     else setContent(next);
   }, [db]);
 
+  const optImg = useCallback((url, size = 512) => {
+    if (!url) return '';
+    if (url.includes('image_1024')) {
+      return url.replace('image_1024', `image_${size}`);
+    }
+    return url;
+  }, []);
+
   const store = {
-    lang, setLang, dir, route, navigate, t, money,
+    lang, setLang, dir, route, navigate, t, money, optImg,
     cart, addToCart, updateQty, removeItem, subtotal, spoolCount, bulkDiscount, openCart, closeCart,
     lastOrder, placeOrder, toast,
     showBadges: tw.badges,

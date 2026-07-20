@@ -98,7 +98,33 @@ const CustomRequestForm = () => {
 /* ---------- Home ---------- */
 const HomePage = () => {
   const { t, dir, navigate, lang, products, content } = useStore();
-  const bestsellers = products.slice(0, 8); // show first 8 products as bestsellers
+  const bestsellers = React.useMemo(() => {
+    const featured = products.filter(p => p.featured);
+    const selection = [...featured];
+    
+    // Ensure we have at least one Bambu Lab, one Resin, and one PETG in the homepage list if available
+    const bambuProd = products.find(p => p.cat === 'bambu' && !selection.includes(p));
+    if (bambuProd) selection.push(bambuProd);
+    
+    const resinProd = products.find(p => p.cat === 'resin' && !selection.includes(p));
+    if (resinProd) selection.push(resinProd);
+    
+    const petgProd = products.find(p => p.cat === 'petg' && !selection.includes(p));
+    if (petgProd) selection.push(petgProd);
+    
+    const finalSet = [];
+    selection.forEach(p => {
+      if (p && !finalSet.includes(p)) finalSet.push(p);
+    });
+    
+    for (let p of products) {
+      if (finalSet.length >= 8) break;
+      if (!finalSet.includes(p)) finalSet.push(p);
+    }
+    
+    return finalSet.slice(0, 8);
+  }, [products]);
+
   const go = useCta();
   const hc = content.hero || {};
   const heroImg = hc.image || 'logo.png';
@@ -222,28 +248,44 @@ const HomePage = () => {
         {HomeCategories}
       </section>
 
+      {/* Importer Section */}
+      <section className="wrap section-sm importer-section">
+        <div className="importer-layout">
+          <div className="importer-content">
+            <span className="eyebrow">{t({ en: 'Direct Importer', ar: 'مستورد مباشر ومعتمد بمصر' })}</span>
+            <h2 className="h2">{t({ en: 'Enza Trade — Direct Importers', ar: 'إنزا تريد — مستورد معتمد ومباشر لخامات 3D بمصر' })}</h2>
+            <p className="lede">{t({
+              en: 'We are official, direct importers of premier 3D printing filaments and resins. We bring you authentic products directly from Bambu Lab, eSUN, and leading 3D resin brands to ensure unmatched reliability and precision.',
+              ar: 'إنزا تريد هي المورد والمستورد المباشر والمعتمد بمصر لأجود خامات الطباعة ثلاثية الأبعاد. نوفر لك خامات Bambu Lab الأصلية، وفيلامينت eSUN، ومجموعة متنوعة من ريزن 3D عالي الدقة، مباشرة من المصانع الرسمية لضمان تلبية احتياجاتك بأفضل الأسعار.'
+            })}</p>
+            <div className="importer-badges">
+              <span className="ibadge"><Icon n="shield" style={{ width: 18 }} /> {t({ en: '100% Original Guarantee', ar: 'ضمان خامات أصلية 100%' })}</span>
+              <span className="ibadge"><Icon n="cash" style={{ width: 18 }} /> {t({ en: 'Cash on Delivery', ar: 'الدفع عند الاستلام كاش للمندوب' })}</span>
+            </div>
+          </div>
+          <div className="importer-img-box">
+            <img src="enza_trade_collage.jpg" alt="Enza Trade - خيوط PLA+ الأكثر مبيعاً" />
+          </div>
+        </div>
+      </section>
+
       {/* Bestsellers section */}
       <section className="wrap section" style={{ paddingTop: 30 }}>
         <div className="sec-head">
           <div className="stack">
-            <span className="eyebrow">{t(eh.eyebrow)}</span>
-            <h2 className="h2">{t(eh.title)}</h2>
+            <span className="eyebrow">{t({ en: 'Top Choices', ar: 'الخامات الأكثر طلباً' })}</span>
+            <h2 className="h2">{t({ en: 'Bestselling 3D Materials', ar: 'المنتجات الأكثر مبيعاً وطلباً' })}</h2>
           </div>
           <button className="btn btn-ghost" onClick={() => navigate('shop')}>{t(eh.viewAll)}</button>
         </div>
         <div className="grid-products home-grid">{bestsellers.map(p => <ProductCard key={p.id} p={p} />)}</div>
       </section>
 
-      {/* Spool Bundle Deal section */}
-      <section className="wrap section-sm" style={{ paddingTop: 0 }}>
-        {BundleOffer}
-      </section>
-
       {/* Resin section */}
       <section className="section" style={{ background: dir === 'b' ? 'var(--paper)' : 'transparent', paddingTop: 60, paddingBottom: 60 }}>
         <div className="wrap split">
-          <div className="split-img" style={{ aspectRatio: '1/1', background: 'radial-gradient(120% 90% at 50% 20%,#fff,var(--sand))', display: 'grid', placeItems: 'center', overflow: 'hidden', padding: '6%', borderRadius: 'var(--radius-lg)' }}>
-            <img src="resin_collage.png" alt="Enza Trade 3D Resin Collage" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
+          <div className="split-img" style={{ aspectRatio: '1/1', overflow: 'hidden', borderRadius: 'var(--radius-lg)' }}>
+            <img src="resin_collage.jpg" alt="eSUN Resin - Engineered For Every Print" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
           </div>
           <div className="stack gap-l">
             <span className="eyebrow">{t(gift.eyebrow)}</span>
@@ -254,13 +296,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Custom Request Form section */}
-      <section className="wrap section">
-        <CustomRequestForm />
-      </section>
-
       {/* About Enza section */}
-      <section className="wrap section" style={{ paddingTop: 0 }}>
+      <section className="wrap section" style={{ paddingTop: 30, paddingBottom: 30 }}>
         <div className="values">
           {vals.map((v, i) => (
             <div className="value" key={i}>
@@ -270,6 +307,16 @@ const HomePage = () => {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Spool Bundle Deal section */}
+      <section className="wrap section-sm" style={{ paddingTop: 0 }}>
+        {BundleOffer}
+      </section>
+
+      {/* Custom Request Form section */}
+      <section className="wrap section" id="custom-request-section">
+        <CustomRequestForm />
       </section>
 
       {/* Quote band */}

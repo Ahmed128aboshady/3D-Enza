@@ -78,7 +78,7 @@ const ShopPage = () => {
 
 /* ---------- Product detail ---------- */
 const ProductPage = () => {
-  const { t, money, navigate, route, addToCart, openCart, toast, lang, products, categories } = useStore();
+  const { t, money, navigate, route, addToCart, openCart, toast, lang, products, categories, optImg } = useStore();
   const p = products.find(x => x.id === route.params.id) || products[0] || {
     id: '', sku: '', cat: '', name: {en:'', ar:''}, price: 0, compareAt: 0, variants: [{color:{en:'', ar:'', hex:''}, img: '', stock: false}], specs: {}
   };
@@ -141,14 +141,14 @@ const ProductPage = () => {
                   onClick={() => setActiveImg(img)}
                   aria-label={t(v.color)}
                 >
-                  <img src={img} alt="" loading="lazy" />
+                  <img src={optImg(img, 128)} alt="" loading="lazy" />
                 </button>
               ))}
             </div>
           )}
           <div className="pdp-main-image-container">
             {!v.stock && <div className="card-oos"><span>{t({ en: 'Out of stock', ar: 'نفد المخزون' })}</span></div>}
-            <img src={activeImg} alt={t(p.name)} className="pdp-main-image" />
+            <img src={optImg(activeImg, 512)} alt={t(p.name)} className="pdp-main-image" />
           </div>
         </div>
 
@@ -169,6 +169,12 @@ const ProductPage = () => {
               </div>
             )}
           </div>
+          {p.cat !== 'resin' && (
+            <div className="pdp-bulk-nudge">
+              <Icon n="sparkle" style={{ color: 'var(--accent)', width: 15, height: 15 }} />
+              <span>{t({ en: 'Buy 10+ filaments, save 50 LE/spool automatically!', ar: 'خصم تلقائي 50 ج.م للبكرة عند طلب 10 بكرات أو أكثر!' })}</span>
+            </div>
+          )}
           
           <p className="pdp-description">{t(p.blurb)}</p>
           
@@ -184,8 +190,7 @@ const ProductPage = () => {
                   key={i} 
                   className={'swatch-pdp ' + (i === vi ? 'active ' : '') + (x.stock ? '' : 'oos')} 
                   style={{ background: x.color.hex }} 
-                  onMouseEnter={() => setVi(i)}
-                  onClick={() => navigate('product', { id: p.id, vi: i })} 
+                  onClick={() => { setVi(i); navigate('product', { id: p.id, vi: i }); }} 
                   title={t(x.color)} 
                 />
               ))}
